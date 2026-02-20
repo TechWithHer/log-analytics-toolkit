@@ -1,9 +1,3 @@
-That’s a solid idea. If you want something practical (not just “grep a file and count errors”), build a **mini production-style log analysis pipeline** that mimics what actually happens in real infra teams.
-
-Here’s a compact but industry-relevant project you can put on GitHub.
-
----
-
 # 🚀 Project: Production-Grade Log Analytics Toolkit (Bash + awk + grep)
 
 ## 🎯 Objective
