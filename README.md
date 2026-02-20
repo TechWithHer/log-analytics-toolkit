@@ -1,4 +1,4 @@
-# 🚀 Project: Production-Grade Log Analytics Toolkit (Bash + awk + grep)
+#Production-Grade Log Analytics Toolkit (Bash + awk + grep)
 
 ## 🎯 Objective
 
