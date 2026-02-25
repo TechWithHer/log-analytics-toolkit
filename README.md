@@ -1,4 +1,26 @@
-# Production-Grade Log Analytics Toolkit (Bash + awk + grep)
+# Lightweight Log Analytics & Anomaly Detection System
+Built using shell scripting, designed to evolve into a production-ready monitoring utility.
+
+
+## 📌 Version Roadmap Overview
+
+### v1.0 → MVP (Batch Analyzer)
+Basic parsing + anomaly detection + summary report.
+
+### v2.0 → Smart Alerting
+Threshold detection + exit codes + email/webhook alerts.
+
+### v3.0 → Historical Trend Engine
+Daily statistics + comparison + anomaly baselining.
+
+### v4.0 → Production Hardening
+Config-driven system + logging + idempotency + error handling.
+
+### v5.0 → Deployable Service
+Dockerized + cron integration + HTML/JSON output.
+
+## v6.0 → Self-Healing Engine
+Auto-remediation triggers.
 
 ## 🎯 Objective
 
