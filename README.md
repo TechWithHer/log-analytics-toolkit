@@ -152,6 +152,29 @@ Create Dockerfile to run pipeline inside container.
 
 That shows modern DevOps thinking.
 
+## Addons (Advanced)
+Threshold-based alerting
+
+Exit code severity
+
+Config file support
+
+Simple HTML dashboard output
+
+Threshold-based alerting (email/Slack/webhook)
+
+Historical trend comparison
+
+Config-driven thresholds (not hardcoded)
+
+Exit codes for CI/CD integration
+
+Containerized deployment
+
+Cron-based scheduling with logging
+
+Self-healing trigger (optional but impressive)
+
 ---
 
 # 🧠 What This Demonstrates on GitHub
