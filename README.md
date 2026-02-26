@@ -1,4 +1,4 @@
-# Lightweight Log Analytics & Statistical Anomaly Detection System
+# LogSentinel: Lightweight Log Analytics & Statistical Anomaly Detection System
 
 A modular, shell-based log analytics toolkit that evolves from basic parsing to a statistically-aware monitoring and anomaly detection engine — designed with production-style DevOps principles.
 
