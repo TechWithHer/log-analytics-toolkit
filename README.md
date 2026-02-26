@@ -1,18 +1,3 @@
-This is good. Very good.
-
-What you have right now is **feature-rich**, but slightly fragmented.
-What we’ll do is:
-
-1. Merge both visions (statistical engine + multi-script toolkit)
-2. Clarify evolution across versions
-3. Make it look intentional, not accidental
-4. From v4 onward, integrate everything cleanly
-5. Give a clear forward roadmap
-
-Below is your **merged, industry-standard README** — structured, strategic, and portfolio-ready.
-
----
-
 # Lightweight Log Analytics & Statistical Anomaly Detection System
 
 A modular, shell-based log analytics toolkit that evolves from basic parsing to a statistically-aware monitoring and anomaly detection engine — designed with production-style DevOps principles.
