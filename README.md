@@ -1,320 +1,202 @@
-# LogSentinel: Lightweight Log Analytics & Statistical Anomaly Detection System
-
-A modular, shell-based log analytics toolkit that evolves from basic parsing to a statistically-aware monitoring and anomaly detection engine — designed with production-style DevOps principles.
-
-Built entirely using native Linux tools (bash, awk, grep, bc).
+# LogSentinel
+### Lightweight CLI-Based Log Analytics & Statistical Anomaly Detection System for DevOps and SRE environments.
 
 ---
 
-# 🎯 Objective
+## Overview
 
-Build a CLI-based log monitoring and anomaly detection system that:
+LogSentinel is a shell-based log analytics tool designed to perform statistical anomaly detection using Z-score methodology.
 
-* Parses large application and Nginx logs
-* Detects error spikes and suspicious behavior
-* Tracks historical trends
-* Applies statistical anomaly detection (Z-score model)
-* Generates reports and dashboards
-* Integrates with automation workflows (cron, CI/CD)
-* Evolves toward production-grade deployment
+It is built to simulate production-ready log monitoring logic in lightweight environments and CI/CD pipelines.
 
-This project demonstrates:
+The project demonstrates:
 
-* Shell scripting mastery
-* awk/grep/sed fluency
-* Log parsing & aggregation
-* Security log detection (brute force simulation)
+* CLI engineering
 * Statistical anomaly detection
-* Observability thinking
-* Production-style automation design
+* Automation readiness
+* CI/CD integration capability
+* Containerized execution
+* DevOps-oriented system thinking
 
 ---
 
-# 🏗 Architecture Overview
+## Core Features
 
-```
-                +------------------+
-                |   Log Sources    |
-                | app.log          |
-                | nginx.log        |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Parsing Engine   |
-                | (awk/grep)       |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Metrics Layer    |
-                | Error counts     |
-                | Latency stats    |
-                | 401 detection    |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Historical Store |
-                | run_history.csv  |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Statistical Core |
-                | Mean             |
-                | Std Deviation    |
-                | Z-score          |
-                +--------+---------+
-                         |
-                         v
-                +------------------+
-                | Alerting Layer   |
-                | Console/Webhook  |
-                +------------------+
-```
+* Argument-driven log input
+* Statistical anomaly detection (Z-score)
+* Configurable threshold
+* Structured output (JSON/Text)
+* Proper exit codes for CI/CD
+* Docker support
+* GitHub Actions integration
+* Alert-ready architecture
 
 ---
 
-# 📌 Version Roadmap (Unified & Structured)
+## Version History
 
-## v1.0 → MVP (Batch Analyzer)
+### Version 1
 
-* Parse app.log
-* Count ERROR/WARN/CRITICAL
-* Generate summary output
-* Exit codes for basic severity
+Basic log parsing and error counting.
 
-Focus: CLI fundamentals
+### Version 2
 
----
+Error summaries and log classification.
 
-## v2.0 → Smart Alerting Layer
+### Version 3
 
-* Threshold-based alerting
-* Status mapping (OK/WARNING/CRITICAL)
-* Exit code severity
-* Basic webhook/email placeholder
+Statistical anomaly detection using Z-score (mean and standard deviation).
 
-Focus: Monitoring mindset
+### Version 4
 
----
+Production-ready CLI tool:
 
-## v3.0 → Historical Trend & Statistical Engine
+* Argument parsing
+* Configurable thresholds
+* Structured output
+* Exit codes
+* Robust error handling
 
-* Persist metrics in run_history.csv
-* Rolling window analysis (last N runs)
-* Calculate:
+### Version 5
 
-  * Mean
-  * Standard deviation
-* Z-score anomaly detection
-* Noise reduction vs static thresholds
+DevOps integration:
 
-Focus: Observability & statistical monitoring
+* Docker containerization
+* GitHub Actions CI pipeline
+* Pipeline failure on anomaly detection
 
----
+### Version 6
 
-## v4.0 → Modular Production Architecture
+Monitoring integration:
 
-Integrates what was previously scattered:
-
-* Config-driven system (no hardcoded thresholds)
-* Modular functions:
-
-  * parse_logs()
-  * detect_bruteforce()
-  * latency_report()
-  * calculate_statistics()
-  * detect_anomaly()
-* Structured logging for tool output
-* Idempotent execution
-* Historical retention management
-* Brute-force detection integrated into main pipeline
-* Latency metrics included in statistical model
-
-Focus: Clean architecture + maintainability
+* Prometheus-style metrics output
+* Slack webhook alert support
+* Time-window based anomaly detection
 
 ---
 
-## v5.0 → Deployable Monitoring Service
+## Statistical Model
 
-* Dockerized pipeline
-* Cron-based scheduling with logging
-* HTML or JSON dashboard output
-* Multi-log support
-* Rotated log handling
-* CI/CD integration via exit codes
-* Prometheus-compatible metrics export (optional)
+Anomalies are detected using Z-score:
 
-Focus: Real deployment readiness
+Z = (X - Mean) / StandardDeviation
 
----
+Default threshold: 2
+(Threshold is configurable via CLI flag.)
 
-## v6.0 → Intelligent & Self-Healing Layer (Optional Advanced)
-
-* Auto-remediation triggers
-* Service restart simulation
-* Block abusive IP after threshold breach
-* Adaptive anomaly thresholds
-* Simple seasonal awareness logic
-
-Focus: Advanced automation maturity
+This allows detection of abnormal log behavior based on deviation from baseline error rates.
 
 ---
 
-# 📁 Project Structure (Post v4 Modular Design)
+## Installation
 
-```
-log-analytics-toolkit/
-│
-├── logs/
-│   ├── app.log
-│   ├── nginx.log
-│
-├── scripts/
-│   ├── core/
-│   │   ├── parser.sh
-│   │   ├── statistics.sh
-│   │   ├── anomaly_engine.sh
-│   │
-│   ├── security/
-│   │   ├── detect_bruteforce.sh
-│   │
-│   ├── performance/
-│   │   ├── latency_report.sh
-│   │
-│   ├── summary_dashboard.sh
-│   ├── run_pipeline.sh
-│
-├── config.cfg
-├── run_history.csv
-├── reports/
-│   └── daily_report.txt
-│
-├── Dockerfile (v5+)
-└── README.md
+Clone repository:
+
+```bash
+git clone https://github.com/yourusername/logsentinel.git
+cd logsentinel
+chmod +x logsentinel.sh
 ```
 
 ---
 
-# 🔬 Core Capabilities
+## Usage
 
-## 1️⃣ Error Analysis
+Basic usage:
 
-* Pattern matching
-* Aggregation
-* Sorting by frequency
-* Historical persistence
+```bash
+./logsentinel.sh --file /var/log/nginx/access.log
+```
 
-## 2️⃣ Brute Force Detection
+Custom threshold:
 
-* Detect IPs with > N 401 responses
-* SOC-style log filtering
-* Incident simulation
+```bash
+./logsentinel.sh --file app.log --threshold 3
+```
 
-## 3️⃣ Latency Analysis
+JSON output:
 
-* Extract response times
-* Compute averages
-* Detect latency spikes
-* Performance anomaly detection
+```bash
+./logsentinel.sh --file app.log --format json
+```
 
-## 4️⃣ Statistical Anomaly Detection (Z-Score)
+Exit Codes:
 
-For last N runs:
-
-1. Compute mean
-
-2. Compute standard deviation
-
-3. Calculate Z-score:
-
-   Z = (current - mean) / std_dev
-
-4. Trigger alert if Z > threshold (default = 2)
-
-This reduces false positives and adapts to traffic growth.
+* 0 → No anomaly
+* 1 → Anomaly detected
+* 2 → Invalid input
 
 ---
 
-# 🧠 Real-World Use Cases
+## CI/CD Example
 
-## Small Company
+Fail pipeline on anomaly:
 
-* No expensive monitoring tools
-* Lightweight anomaly detection
-* Automated hourly monitoring via cron
-* Budget-friendly security & performance insights
-
-## Growing Startup
-
-* Detect traffic anomalies
-* Detect brute force attempts
-* Identify unusual error spikes
-* Track latency degradation trends
-
-## Enterprise-Level Conceptual Value
-
-While enterprises use tools like:
-
-* Prometheus
-* Datadog
-
-This project demonstrates understanding of:
-
-* Rolling baselines
-* Statistical detection models
-* Alert fatigue reduction
-* Observability fundamentals
+```bash
+./logsentinel.sh --file app.log
+if [ $? -eq 1 ]; then
+  exit 1
+fi
+```
 
 ---
 
-# 🔄 Future Enhancement Map
+## Docker Usage
 
-## Short-Term (Next Iteration)
+Build:
 
-* Integrate latency metrics into Z-score model
-* Integrate brute force count into anomaly scoring
-* Add structured JSON output mode
+```bash
+docker build -t logsentinel .
+```
 
-## Mid-Term
+Run:
 
-* Multi-day rolling window (24h baseline)
-* Percentile-based detection (p95 latency)
-* Log rotation auto-detection
-
-## Advanced
-
-* Adaptive thresholds based on traffic growth
-* Seasonal pattern detection (time-of-day awareness)
-* Self-healing service restart logic
+```bash
+docker run -v $(pwd)/logs:/logs logsentinel --file /logs/app.log
+```
 
 ---
 
-# 🧠 What This Project Proves
+## Use Cases
 
-This repository demonstrates:
-
-* Shell engineering discipline
-* Observability thinking
-* Security awareness
-* Statistical reasoning in monitoring
-* Clean modular architecture
-* Automation-first DevOps mindset
-
-This is not just "grep practice".
-
-This is a progressively engineered monitoring system built from scratch.
+* Small teams without enterprise monitoring tools
+* CI/CD anomaly detection
+* Pre-production log validation
+* Security log spike detection
+* Lightweight DevOps observability simulation
 
 ---
 
-Now here’s an important strategic question:
+## Why This Project
 
-Do you want this to be positioned as:
+This project demonstrates applied DevOps engineering practices including:
 
-1. A DevOps portfolio showcase
-2. A real open-source monitoring utility
-3. A learning journey with documented evolution
+* Statistical reasoning in operations
+* CLI tool design
+* Production thinking
+* CI/CD pipeline integration
+* Containerized deployment
+* Automation-first architecture
 
-Because the README tone changes slightly depending on which direction you choose.
+---
+
+# Final Honest Advice
+
+You are no longer building “just a log script”.
+
+You are building:
+
+> A DevOps capability showcase.
+
+Keep it lean.
+Keep it real.
+Keep it technically correct.
+No fake claims.
+No buzzword stuffing.
+
+If you want next:
+
+* We can refine the architecture diagram.
+* Or we can design how to talk about this in interviews in Singapore market.
+
+Where do you want to go next? 🚀
