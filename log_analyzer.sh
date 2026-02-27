@@ -10,7 +10,7 @@ echo "========== Log Analysis Summary =========="
 
 # -------------------------------
 # Load Configuration
-CONFIG_FILE="../log-analytics-toolkit/config/config.cfg"
+CONFIG_FILE="../config.cfg"
 
 # Check if configuration file exists
 if [[ ! -e "$CONFIG_FILE" ]]; then
