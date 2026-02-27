@@ -1,0 +1,15 @@
+2026-02-27 09:15:12 | INFO | User login successful for user: ayushi
+2026-02-27 09:16:45 | WARNING | Disk usage at 75% on /dev/sda1
+2026-02-27 09:17:03 | ERROR | Failed to connect to database: timeout
+2026-02-27 09:18:20 | INFO | Scheduled backup completed successfully
+2026-02-27 09:19:10 | CRITICAL | Service payment-gateway crashed unexpectedly
+2026-02-27 09:20:55 | ERROR | Failed to send email notification to user: 502 Bad Gateway
+2026-02-27 09:21:30 | INFO | User updated profile settings: user_id=102
+2026-02-27 09:22:11 | WARNING | High memory usage detected: 82% used
+2026-02-27 09:23:50 | INFO | New user registered: user_id=103
+2026-02-27 09:24:25 | CRITICAL | OutOfMemoryError in analytics-service
+2026-02-27 09:25:40 | ERROR | File upload failed: permission denied
+2026-02-27 09:26:15 | INFO | Cache cleared successfully
+2026-02-27 09:27:50 | WARNING | API response time above threshold: 1200ms
+2026-02-27 09:28:33 | INFO | User logout successful: user_id=101
+2026-02-27 09:29:12 | ERROR | Payment transaction failed: insufficient funds
