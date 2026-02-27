@@ -1,4 +1,0 @@
-2026-02-20 10:12:01 INFO User login success user_id=101 ip=192.168.1.10
-2026-02-20 10:12:05 ERROR DB connection timeout
-2026-02-20 10:12:08 WARN High memory usage 85%
-2026-02-20 10:13:01 ERROR Payment service failed user_id=203

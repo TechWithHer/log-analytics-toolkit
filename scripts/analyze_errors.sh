@@ -1,5 +1,13 @@
 #!/bin/bash
 
+<<Comment
+parse_logs()
+calculate_statistics()
+detect_anomaly()
+log_results()
+Comment
+
+
 echo "========== Log Analysis Summary =========="
 
 #Step 1: Accept an Argument.
