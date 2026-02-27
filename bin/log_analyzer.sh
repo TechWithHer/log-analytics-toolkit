@@ -3,15 +3,15 @@
 echo "========== Log Analysis Summary =========="
 
 # Load Config
-CONFIG_FILE="../config/config.cfg"
+CONFIG_FILE="/Users/apple/desktop/TechWithHer/log-analytics-toolkit/config
+/config.cfg"
 
-if [[ ! -f "$CONFIG_FILE" ]]; then
+if [[ ! -e "$CONFIG_FILE" ]]; then
   echo "[ERROR] Config file not found!"
   exit 3
 fi
 
 source "$CONFIG_FILE"
-
 LOG_FILE="$1"
 
 # -------------------------------
