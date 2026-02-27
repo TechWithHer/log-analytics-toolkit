@@ -10,7 +10,7 @@ echo "========== Log Analysis Summary =========="
 
 # -------------------------------
 # Load Configuration
-CONFIG_FILE="/Users/apple/Desktop/TechWithHer/log-analytics-toolkit"
+CONFIG_FILE="/Users/apple/Desktop/TechWithHer/log-analytics-toolkit/config.cfg"
 
 # Check if configuration file exists
 if [[ ! -f "$CONFIG_FILE" ]]; then
