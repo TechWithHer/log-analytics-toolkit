@@ -180,23 +180,3 @@ This project demonstrates applied DevOps engineering practices including:
 
 ---
 
-# Final Honest Advice
-
-You are no longer building “just a log script”.
-
-You are building:
-
-> A DevOps capability showcase.
-
-Keep it lean.
-Keep it real.
-Keep it technically correct.
-No fake claims.
-No buzzword stuffing.
-
-If you want next:
-
-* We can refine the architecture diagram.
-* Or we can design how to talk about this in interviews in Singapore market.
-
-Where do you want to go next? 🚀
