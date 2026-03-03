@@ -4,6 +4,4 @@ WORKDIR /app
 
 COPY generator.py .
 
-RUN mkdir -p /app/logs
-
 CMD ["python", "generator.py"]
