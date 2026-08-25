@@ -1,3 +1,6 @@
+# Runtime data
+runtime_logs/*.log
+runtime_logs/*.csv
 
 # Python
 __pycache__/

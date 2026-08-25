@@ -2,6 +2,8 @@
 
 set -uo pipefail
 
+TEST_DATA="test_data/sample_app.log"
+
 LOG_FILE="runtime_logs/app.log"
 HISTORY_FILE="runtime_logs/run_history.csv"
 SCRIPT_LOG="runtime_logs/script_log.log"
@@ -10,17 +12,19 @@ PASSED=0
 FAILED=0
 
 
+# --------------------------------------------------
+# Test helpers
+# --------------------------------------------------
+
 pass() {
     echo "PASS: $1"
     ((PASSED+=1))
 }
 
-
 fail() {
     echo "FAIL: $1"
     ((FAILED+=1))
 }
-
 
 run_test() {
     local name="$1"
@@ -34,13 +38,27 @@ run_test() {
 }
 
 
+# --------------------------------------------------
+# Test environment
+# --------------------------------------------------
+
 cleanup() {
     rm -f "$LOG_FILE"
     rm -f "$HISTORY_FILE"
     rm -f "$SCRIPT_LOG"
 }
 
+setup_runtime() {
+    mkdir -p runtime_logs
+}
 
+setup_sample_log() {
+    setup_runtime
+    cp "$TEST_DATA" "$LOG_FILE"
+}
+
+
+# Always clean runtime files when the test suite exits
 trap cleanup EXIT
 
 
@@ -51,18 +69,7 @@ trap cleanup EXIT
 test_healthy() {
 
     cleanup
-
-    for _ in {1..80}; do
-        echo "2026-08-25 10:00:00 INFO 200 ResponseTime=100ms"
-    done > "$LOG_FILE"
-
-    for _ in {1..10}; do
-        echo "2026-08-25 10:00:01 WARNING 404 ResponseTime=300ms"
-    done >> "$LOG_FILE"
-
-    for _ in {1..2}; do
-        echo "2026-08-25 10:00:02 ERROR 500 ResponseTime=500ms"
-    done >> "$LOG_FILE"
+    setup_sample_log
 
     local output
     local exit_code
@@ -84,14 +91,17 @@ test_healthy() {
 test_error_threshold() {
 
     cleanup
+    setup_runtime
 
-    for _ in {1..30}; do
-        echo "2026-08-25 10:00:00 INFO 200 ResponseTime=100ms"
-    done > "$LOG_FILE"
+    {
+        for _ in {1..30}; do
+            echo "2026-08-25 10:00:00 INFO 200 ResponseTime=100ms"
+        done
 
-    for _ in {1..20}; do
-        echo "2026-08-25 10:00:01 ERROR 500 ResponseTime=500ms"
-    done >> "$LOG_FILE"
+        for _ in {1..20}; do
+            echo "2026-08-25 10:00:01 ERROR 500 ResponseTime=500ms"
+        done
+    } > "$LOG_FILE"
 
     local output
     local exit_code
@@ -113,14 +123,17 @@ test_error_threshold() {
 test_critical() {
 
     cleanup
+    setup_runtime
 
-    for _ in {1..20}; do
-        echo "2026-08-25 10:00:00 INFO 200 ResponseTime=100ms"
-    done > "$LOG_FILE"
+    {
+        for _ in {1..20}; do
+            echo "2026-08-25 10:00:00 INFO 200 ResponseTime=100ms"
+        done
 
-    for _ in {1..5}; do
-        echo "2026-08-25 10:00:01 CRITICAL 503 ResponseTime=3000ms"
-    done >> "$LOG_FILE"
+        for _ in {1..5}; do
+            echo "2026-08-25 10:00:01 CRITICAL 503 ResponseTime=3000ms"
+        done
+    } > "$LOG_FILE"
 
     local output
     local exit_code
@@ -139,7 +152,18 @@ test_critical() {
 # Test 4 — History creation
 # --------------------------------------------------
 
-test_history() {
+test_history_creation() {
+
+    cleanup
+    setup_sample_log
+
+    local output
+    local exit_code
+
+    set +e
+    output=$(./main.sh 2>&1)
+    exit_code=$?
+    set -e
 
     [[ -f "$HISTORY_FILE" ]] &&
     grep -q "timestamp,errors,critical,warnings" "$HISTORY_FILE"
@@ -150,7 +174,7 @@ test_history() {
 # Test 5 — Runtime logging
 # --------------------------------------------------
 
-test_runtime_log() {
+test_runtime_logging() {
 
     [[ -f "$SCRIPT_LOG" ]] &&
     [[ -s "$SCRIPT_LOG" ]]
@@ -158,7 +182,7 @@ test_runtime_log() {
 
 
 # --------------------------------------------------
-# Run tests
+# Test suite
 # --------------------------------------------------
 
 echo
@@ -170,9 +194,13 @@ echo
 run_test "Healthy application" test_healthy
 run_test "Error threshold" test_error_threshold
 run_test "Critical threshold" test_critical
-run_test "History creation" test_history
-run_test "Runtime logging" test_runtime_log
+run_test "History creation" test_history_creation
+run_test "Runtime logging" test_runtime_logging
 
+
+# --------------------------------------------------
+# Summary
+# --------------------------------------------------
 
 echo
 echo "========================================"
