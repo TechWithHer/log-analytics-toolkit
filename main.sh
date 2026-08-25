@@ -1,10 +1,9 @@
 #!/bin/bash
-
 set -euo pipefail
 
 echo "========== Log Analysis Summary =========="
 
-CONFIG_FILE="./config.cfg"
+CONFIG_FILE="config.cfg"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   echo "[ERROR] Config file not found at $CONFIG_FILE"
