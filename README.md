@@ -1,6 +1,10 @@
 # LogSentinel
 ### Lightweight CLI-Based Log Analytics & Statistical Anomaly Detection System for DevOps and SRE environments.
 
+I built a lightweight CLI-based log analytics and anomaly detection tool for DevOps/SRE environments. It simulates application logs, analyzes error and severity patterns, establishes a recent historical baseline, and uses Z-score analysis to identify abnormal behavior. The tool returns meaningful exit codes so it can be integrated into CI/CD pipelines or scheduled monitoring workflows.
+
+"Fixed thresholds tell me when a value crosses an absolute limit, but they don't tell me whether the behavior is unusual for that particular application. Z-score lets me compare the current error rate against its recent baseline."
+
 Generate application logs → continuously analyze them → calculate error statistics → detect abnormal behavior → classify system health → return an exit code that CI/CD can understand.
 ---
 

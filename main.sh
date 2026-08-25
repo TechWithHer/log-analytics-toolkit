@@ -1,121 +1,152 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 set -euo pipefail
 
-echo "========== Log Analysis Summary =========="
+LOG_FILE="runtime_logs/app.log"
+HISTORY_FILE="runtime_logs/run_history.csv"
+SCRIPT_LOG="runtime_logs/script_log.log"
 
-CONFIG_FILE="config.cfg"
+ERROR_THRESHOLD=20
+CRITICAL_THRESHOLD=5
+Z_THRESHOLD=2
+ROLLING_WINDOW=10
+MAX_HISTORY_LINES=20
 
-if [[ ! -f "$CONFIG_FILE" ]]; then
-  echo "[ERROR] Config file not found at $CONFIG_FILE"
-  exit 3
+
+# --------------------------------------------------
+# Validate
+# --------------------------------------------------
+
+if [[ ! -f "$LOG_FILE" ]]; then
+    echo "ERROR: Log file not found: $LOG_FILE"
+    exit 2
 fi
 
-source "$CONFIG_FILE"
+mkdir -p runtime_logs
 
-required_vars=(HISTORY_FILE ROLLING_WINDOW Z_THRESHOLD MAX_HISTORY_LINES CRITICAL_THRESHOLD ERROR_THRESHOLD SCRIPT_LOG)
 
-for var in "${required_vars[@]}"; do
-  if [[ -z "${!var:-}" ]]; then
-    echo "[ERROR] Missing config variable: $var"
-    exit 5
-  fi
-done
+# --------------------------------------------------
+# Analyze logs
+# --------------------------------------------------
 
-LOG_FILE="${1:-}"
+total_lines=$(wc -l < "$LOG_FILE")
 
-if [[ -z "$LOG_FILE" || ! -f "$LOG_FILE" ]]; then
-  echo "[ERROR] Invalid log file path"
-  exit 2
-fi
+errors=$(grep -c " ERROR " "$LOG_FILE" || true)
+warnings=$(grep -c " WARNING " "$LOG_FILE" || true)
+critical=$(grep -c " CRITICAL " "$LOG_FILE" || true)
 
-start_time=$(date +%s)
 
-# -------------------------------
-# Parse Logs
-# -------------------------------
-lines=$(wc -l < "$LOG_FILE")
-errors=$(grep -c "\bERROR\b" "$LOG_FILE" || true)
-warnings=$(grep -c "\bWARNING\b" "$LOG_FILE" || true)
-critical=$(grep -c "\bCRITICAL\b" "$LOG_FILE" || true)
+# --------------------------------------------------
+# Prepare history
+# --------------------------------------------------
 
-# -------------------------------
-# Prepare History File
-# -------------------------------
 if [[ ! -f "$HISTORY_FILE" ]]; then
-  mkdir -p "$(dirname "$HISTORY_FILE")"
-  echo "timestamp,errors,critical,warnings" > "$HISTORY_FILE"
+    echo "timestamp,errors,critical,warnings" > "$HISTORY_FILE"
 fi
 
-# -------------------------------
-# Calculate Statistics
-# -------------------------------
-data_lines=$(tail -n +2 "$HISTORY_FILE" | tail -n "$ROLLING_WINDOW")
 
-count=$(echo "$data_lines" | wc -l)
+# --------------------------------------------------
+# Calculate baseline
+# --------------------------------------------------
+
+history=$(tail -n "$ROLLING_WINDOW" "$HISTORY_FILE" | tail -n +2)
+count=$(printf '%s\n' "$history" | grep -c . || true)
 
 mean=0
 std_dev=0
 z_score=0
 
 if [[ "$count" -gt 1 ]]; then
-  mean=$(echo "$data_lines" | awk -F ',' '{sum+=$2} END{print sum/NR}')
-  std_dev=$(echo "$data_lines" | awk -F ',' -v mean="$mean" '{sum+=($2-mean)^2} END{print sqrt(sum/NR)}')
 
-  if [[ "$std_dev" != "0" ]]; then
-    z_score=$(echo "scale=4; ($errors - $mean)/$std_dev" | bc -l)
-  fi
+    mean=$(printf '%s\n' "$history" |
+        awk -F',' '{sum += $2} END {printf "%.2f", sum / NR}')
+
+    std_dev=$(printf '%s\n' "$history" |
+        awk -F',' -v mean="$mean" \
+        '{sum += ($2 - mean)^2}
+         END {printf "%.2f", sqrt(sum / NR)}')
+
+    if [[ "$std_dev" != "0.00" ]]; then
+        z_score=$(awk \
+            -v errors="$errors" \
+            -v mean="$mean" \
+            -v std="$std_dev" \
+            'BEGIN {
+                printf "%.2f", (errors - mean) / std
+            }')
+    fi
 fi
 
-abs_z=$(echo "$z_score" | awk '{print ($1<0)?-$1:$1}')
 
-# -------------------------------
-# Determine Status
-# Priority: CRITICAL > THRESHOLD > ANOMALY > OK
-# -------------------------------
-STATUS="OK"
-EXIT_CODE=0
+# --------------------------------------------------
+# Determine status
+# --------------------------------------------------
+
+status="OK"
+exit_code=0
+
+abs_z=$(awk -v z="$z_score" \
+    'BEGIN { print (z < 0) ? -z : z }')
 
 if [[ "$critical" -ge "$CRITICAL_THRESHOLD" ]]; then
-  STATUS="CRITICAL"
-  EXIT_CODE=2
+    status="CRITICAL"
+    exit_code=2
 
 elif [[ "$errors" -ge "$ERROR_THRESHOLD" ]]; then
-  STATUS="WARNING"
-  EXIT_CODE=1
+    status="WARNING"
+    exit_code=1
 
-elif (( $(echo "$abs_z > $Z_THRESHOLD" | bc -l) )); then
-  STATUS="ANOMALY"
-  EXIT_CODE=1
+elif awk -v z="$abs_z" -v threshold="$Z_THRESHOLD" \
+    'BEGIN { exit !(z > threshold) }'; then
+    status="ANOMALY"
+    exit_code=1
 fi
 
-# -------------------------------
-# Update History (after calculation)
-# -------------------------------
-timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+
+# --------------------------------------------------
+# Update history
+# --------------------------------------------------
+
+timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+
 echo "$timestamp,$errors,$critical,$warnings" >> "$HISTORY_FILE"
 
 {
-  head -n 1 "$HISTORY_FILE"
-  tail -n "$MAX_HISTORY_LINES" "$HISTORY_FILE"
-} > temp && mv temp "$HISTORY_FILE"
+    head -n 1 "$HISTORY_FILE"
+    tail -n "$MAX_HISTORY_LINES" "$HISTORY_FILE"
+} > "${HISTORY_FILE}.tmp"
 
-# -------------------------------
-# Runtime + Logging
-# -------------------------------
-end_time=$(date +%s)
-runtime=$((end_time - start_time))
+mv "${HISTORY_FILE}.tmp" "$HISTORY_FILE"
 
-mkdir -p "$(dirname "$SCRIPT_LOG")"
-echo "$(date) | Status: $STATUS | Errors: $errors | Critical: $critical | Z: $z_score | Runtime: ${runtime}s" >> "$SCRIPT_LOG"
 
-# -------------------------------
-# Output Summary
-# -------------------------------
-echo "Total Lines: $lines"
-echo "Errors: $errors | Critical: $critical | Warnings: $warnings"
-echo "Mean: $mean | StdDev: $std_dev | Z-Score: $z_score"
-echo "Runtime: ${runtime}s"
-echo "SYSTEM STATUS: $STATUS"
-echo "=========================================="
+# --------------------------------------------------
+# Runtime log
+# --------------------------------------------------
 
-exit $EXIT_CODE
+echo "$timestamp | status=$status errors=$errors critical=$critical z_score=$z_score" \
+    >> "$SCRIPT_LOG"
+
+
+# --------------------------------------------------
+# Output
+# --------------------------------------------------
+
+cat <<EOF
+
+========== Log Analysis ==========
+Log file      : $LOG_FILE
+Total lines   : $total_lines
+Errors        : $errors
+Warnings      : $warnings
+Critical      : $critical
+
+Mean errors   : $mean
+Std deviation : $std_dev
+Z-score       : $z_score
+
+System status : $status
+===================================
+
+EOF
+
+exit "$exit_code"
