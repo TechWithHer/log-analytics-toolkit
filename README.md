@@ -1,230 +1,1152 @@
-# LogSentinel
-### Lightweight CLI-Based Log Analytics & Statistical Anomaly Detection System for DevOps and SRE environments.
+Absolutely. Based on the **actual scope we've agreed on**—without adding unnecessary Docker/Kubernetes/cloud complexity—the README should tell a clean DevOps story:
 
-I built a lightweight CLI-based log analytics and anomaly detection tool for DevOps/SRE environments. It simulates application logs, analyzes error and severity patterns, establishes a recent historical baseline, and uses Z-score analysis to identify abnormal behavior. The tool returns meaningful exit codes so it can be integrated into CI/CD pipelines or scheduled monitoring workflows.
+**Generate → Analyze → Detect → Test → CI → Package/Release**
 
-"Fixed thresholds tell me when a value crosses an absolute limit, but they don't tell me whether the behavior is unusual for that particular application. Z-score lets me compare the current error rate against its recent baseline."
+Here is the complete README, ready to copy.
 
-Generate application logs → continuously analyze them → calculate error statistics → detect abnormal behavior → classify system health → return an exit code that CI/CD can understand.
+````markdown
+# Log Analytics Toolkit
+
+## Lightweight CLI-Based Log Analytics & Statistical Anomaly Detection
+
+A lightweight **CLI-based log analytics and anomaly detection tool** designed for **DevOps and SRE environments**.
+
+The project simulates application logs, analyzes operational health, maintains a small historical baseline, detects abnormal error patterns using statistical analysis, and exposes meaningful exit codes that can be consumed by automation and CI/CD pipelines.
+
+The goal is simple:
+
+> **Turn raw application logs into an actionable system health signal.**
+
 ---
 
 ## Overview
 
-LogSentinel is a shell-based log analytics tool designed to perform statistical anomaly detection using Z-score methodology.
+Applications continuously generate logs containing information about their operational state:
 
-It is built to simulate production-ready log monitoring logic in lightweight environments and CI/CD pipelines.
+- INFO
+- WARNING
+- ERROR
+- CRITICAL
 
-The project demonstrates:
+Manually reviewing these logs becomes inefficient as the volume increases.
 
-* CLI engineering
+This project provides a lightweight automated approach to:
+
+1. Generate realistic application logs.
+2. Analyze log severity patterns.
+3. Count errors, warnings, and critical events.
+4. Maintain a rolling historical baseline.
+5. Calculate statistical deviation using Z-score.
+6. Detect abnormal application behavior.
+7. Return meaningful Linux exit codes.
+8. Automatically test the analyzer.
+9. Run those tests through GitHub Actions CI.
+10. Package and release the validated tool.
+
+The project intentionally avoids unnecessary infrastructure and focuses on the core DevOps/SRE problem:
+
+```text
+Application Logs
+       |
+       v
+   Log Analysis
+       |
+       v
+Historical Baseline
+       |
+       v
+Statistical Analysis
+       |
+       v
+System Health Status
+       |
+       v
+Automation / CI
+````
+
+---
+
+# Problem Statement
+
+In a production environment, applications can generate thousands of log entries.
+
+A simple approach might be:
+
+```text
+ERROR count > 20
+        |
+        v
+      ALERT
+```
+
+However, fixed thresholds do not always represent abnormal behavior.
+
+For example:
+
+```text
+Application A
+
+Normal:
+5 errors
+
+Current:
+15 errors
+
+15 may be a significant increase.
+```
+
+While another application may normally produce:
+
+```text
+100 errors
+```
+
+and suddenly produce:
+
+```text
+115 errors
+```
+
+The same absolute increase does not necessarily indicate the same level of concern.
+
+Therefore, this project combines:
+
+* **Threshold-based detection**
+* **Historical baseline analysis**
+* **Statistical anomaly detection**
+
+to provide a more meaningful operational signal.
+
+---
+
+# Project Objectives
+
+The project is designed to demonstrate practical DevOps and SRE concepts:
+
+* Linux shell automation
+* Python scripting
+* Log processing
+* Operational monitoring concepts
 * Statistical anomaly detection
-* Automation readiness
-* CI/CD integration capability
-* Containerized execution
-* DevOps-oriented system thinking
+* Historical baselines
+* Exit-code driven automation
+* Automated testing
+* GitHub Actions CI
+* Packaging and release automation
+* Clean separation between source, test data, and runtime data
 
 ---
 
-## Core Features
+# Architecture
 
-* Argument-driven log input
-* Statistical anomaly detection (Z-score)
-* Configurable threshold
-* Structured output (JSON/Text)
-* Proper exit codes for CI/CD
-* Docker support
-* GitHub Actions integration
-* Alert-ready architecture
+```text
+                    +-------------------+
+                    |   generator.py    |
+                    |                   |
+                    | Simulates traffic |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    |      app.log      |
+                    |                   |
+                    | Application logs  |
+                    +---------+---------+
+                              |
+                              v
+                    +-------------------+
+                    |      main.sh      |
+                    |                   |
+                    | Log Analyzer      |
+                    +---------+---------+
+                              |
+              +---------------+---------------+
+              |               |               |
+              v               v               v
+         Error Count     Critical Count    Warnings
+              |               |               |
+              +---------------+---------------+
+                              |
+                              v
+                    Historical Baseline
+                              |
+                              v
+                         Z-Score
+                              |
+                              v
+                    +-------------------+
+                    |   System Status   |
+                    +-------------------+
+                              |
+             +----------------+----------------+
+             |                |                |
+             v                v                v
+            OK             WARNING          CRITICAL
+                              |
+                              v
+                           ANOMALY
+                              |
+                              v
+                        Exit Code
+                              |
+                              v
+                     CI/CD Automation
+```
 
 ---
 
-## Version History
+# Project Structure
 
-### Version 1
+```text
+Log-Analytics-ToolKit/
+│
+├── generator.py
+├── main.sh
+├── test.sh
+├── README.md
+├── CHANGELOG.md
+├── .gitignore
+│
+├── test_data/
+│   └── sample_app.log
+│
+└── runtime_logs/
+    ├── app.log
+    ├── run_history.csv
+    └── script_log.log
+```
 
-Basic log parsing and error counting.
+## Source Files
 
-### Version 2
+### `generator.py`
 
-Error summaries and log classification.
+Generates simulated application logs.
 
-### Version 3
+It supports two modes:
 
-Statistical anomaly detection using Z-score (mean and standard deviation).
+### Normal mode
 
-### Version 4
+```text
+INFO       ~80%
+WARNING    ~15%
+ERROR       ~4%
+CRITICAL    ~1%
+```
 
-Production-ready CLI tool:
+This represents relatively healthy application behavior.
 
-* Argument parsing
-* Configurable thresholds
-* Structured output
+### Anomaly mode
+
+```text
+INFO       ~40%
+WARNING    ~15%
+ERROR      ~30%
+CRITICAL   ~15%
+```
+
+This deliberately introduces abnormal behavior so that the analyzer can be tested against a reproducible anomaly.
+
+Run normal mode:
+
+```bash
+python3 generator.py
+```
+
+Run anomaly mode:
+
+```bash
+python3 generator.py --anomaly
+```
+
+Stop the generator with:
+
+```text
+Ctrl+C
+```
+
+---
+
+# `main.sh`
+
+The primary log analysis engine.
+
+It:
+
+1. Reads `runtime_logs/app.log`.
+2. Counts total log entries.
+3. Counts ERROR events.
+4. Counts WARNING events.
+5. Counts CRITICAL events.
+6. Maintains historical analysis data.
+7. Calculates the recent error baseline.
+8. Calculates standard deviation.
+9. Calculates Z-score.
+10. Determines the system status.
+11. Records the analysis result.
+12. Returns a meaningful exit code.
+
+Run it with:
+
+```bash
+./main.sh
+```
+
+Example output:
+
+```text
+========== Log Analysis ==========
+Log file      : runtime_logs/app.log
+Total lines   : 525
+Errors        : 12
+Warnings      : 18
+Critical      : 1
+
+Mean errors   : 8.40
+Std deviation : 1.72
+Z-score       : 2.09
+
+System status : ANOMALY
+===================================
+```
+
+---
+
+# `test.sh`
+
+`test.sh` is the automated test suite for the analyzer.
+
+It validates the expected behavior of the application rather than relying on manual testing.
+
+The current tests cover:
+
+* Healthy application
+* Error threshold
+* Critical threshold
+* History creation
+* Runtime logging
+
+Run the test suite:
+
+```bash
+./test.sh
+```
+
+Expected result:
+
+```text
+========================================
+ Log Analytics Toolkit Test Suite
+========================================
+
+PASS: Healthy application
+PASS: Error threshold
+PASS: Critical threshold
+PASS: History creation
+PASS: Runtime logging
+
+========================================
+ Test Summary
+========================================
+Passed : 5
+Failed : 0
+========================================
+```
+
+The test suite creates and removes runtime data automatically so tests do not depend on previous executions.
+
+---
+
+# Test Data
+
+The repository contains deterministic test data:
+
+```text
+test_data/sample_app.log
+```
+
+This file is intentionally committed to Git.
+
+It provides a predictable baseline for testing the analyzer.
+
+This is different from runtime data.
+
+```text
+test_data/
+    |
+    +-- sample_app.log
+        |
+        +-- Version controlled
+        +-- Deterministic
+        +-- Used by tests
+```
+
+---
+
+# Runtime Data
+
+Runtime-generated files are stored separately:
+
+```text
+runtime_logs/
+```
+
+The directory may contain:
+
+```text
+runtime_logs/
+├── app.log
+├── run_history.csv
+└── script_log.log
+```
+
+These files are intentionally excluded from Git.
+
+They represent runtime state rather than source code or test fixtures.
+
+---
+
+# Statistical Anomaly Detection
+
+The analyzer maintains a rolling history of recent error counts.
+
+The current error count is compared against the historical baseline.
+
+The project uses the Z-score:
+
+```text
+Z = (X - μ) / σ
+```
+
+Where:
+
+```text
+X = current error count
+
+μ = historical mean
+
+σ = historical standard deviation
+```
+
+The configured anomaly threshold is:
+
+```text
+Z_THRESHOLD=2
+```
+
+Therefore, when:
+
+```text
+|Z| > 2
+```
+
+the current error rate is considered statistically unusual.
+
+This allows the system to detect changes in behavior rather than relying only on absolute thresholds.
+
+---
+
+# Detection Rules
+
+The analyzer currently uses the following priority:
+
+```text
+CRITICAL
+    ↓
+ERROR THRESHOLD
+    ↓
+STATISTICAL ANOMALY
+    ↓
+OK
+```
+
+The thresholds are:
+
+```text
+ERROR_THRESHOLD=20
+CRITICAL_THRESHOLD=5
+Z_THRESHOLD=2
+```
+
+Therefore:
+
+### Critical
+
+```text
+CRITICAL >= 5
+```
+
+Result:
+
+```text
+SYSTEM STATUS = CRITICAL
+EXIT CODE = 2
+```
+
+### Warning
+
+```text
+ERROR >= 20
+```
+
+Result:
+
+```text
+SYSTEM STATUS = WARNING
+EXIT CODE = 1
+```
+
+### Anomaly
+
+```text
+|Z-score| > 2
+```
+
+Result:
+
+```text
+SYSTEM STATUS = ANOMALY
+EXIT CODE = 1
+```
+
+### Healthy
+
+If none of the above conditions are met:
+
+```text
+SYSTEM STATUS = OK
+EXIT CODE = 0
+```
+
+---
+
+# Exit Codes
+
+Exit codes make the tool useful for automation.
+
+| Exit Code | Meaning                        |
+| --------- | ------------------------------ |
+| `0`       | Healthy / OK                   |
+| `1`       | Warning or statistical anomaly |
+| `2`       | Critical condition             |
+| `2`       | Invalid or missing log input   |
+
+Example:
+
+```bash
+./main.sh
+
+echo $?
+```
+
+A CI/CD pipeline can use these exit codes to determine whether a stage should succeed or fail.
+
+---
+
+# Why Exit Codes Matter
+
+A monitoring script becomes much more useful when another system can consume its result.
+
+For example:
+
+```text
+main.sh
+   |
+   +-- exit 0 --> healthy
+   |
+   +-- exit 1 --> warning/anomaly
+   |
+   +-- exit 2 --> critical
+```
+
+This makes the tool suitable for:
+
+* CI pipelines
+* Scheduled jobs
+* Cron
+* Server automation
+* Health checks
+* Monitoring wrappers
+* Incident automation
+
+---
+
+# CI — Continuous Integration
+
+The project uses GitHub Actions to automatically execute the test suite.
+
+The intended CI workflow is:
+
+```text
+Developer
+    |
+    v
+git push / Pull Request
+    |
+    v
+GitHub Actions
+    |
+    v
+Checkout repository
+    |
+    v
+Run test.sh
+    |
+    +-------- PASS --------+
+    |                      |
+    v                      v
+ CI GREEN              CI FAILED
+```
+
+The important principle is that GitHub Actions runs the **same test suite used locally**.
+
+Local:
+
+```bash
+./test.sh
+```
+
+CI:
+
+```bash
+./test.sh
+```
+
+This prevents the CI environment from having a completely different testing process from the developer environment.
+
+---
+
+# Continuous Delivery
+
+The project does not require a traditional production deployment environment.
+
+Instead, the planned Continuous Delivery stage focuses on:
+
+```text
+CI
+ |
+ v
+Tests pass
+ |
+ v
+Package project
+ |
+ v
+Create version
+ |
+ v
+Create release artifact
+ |
+ v
+Publish release
+```
+
+For example:
+
+```text
+log-analytics-toolkit-v1.0.0.tar.gz
+```
+
+The goal is to keep the project in a **releasable state**.
+
+This demonstrates Continuous Delivery without inventing an unnecessary production deployment environment.
+
+---
+
+# Continuous Delivery vs Continuous Deployment
+
+This project follows the Continuous Delivery model.
+
+### Continuous Delivery
+
+```text
+Code
+ ↓
+Test
+ ↓
+Package
+ ↓
+Release
+ ↓
+Ready to deploy
+```
+
+A release may still require manual approval before production deployment.
+
+### Continuous Deployment
+
+```text
+Code
+ ↓
+Test
+ ↓
+Package
+ ↓
+Release
+ ↓
+Automatic production deployment
+```
+
+Continuous Deployment would require an actual deployment target.
+
+For this project, automatic deployment is intentionally outside the current scope.
+
+---
+
+# DevOps / SRE Use Cases
+
+## 1. CI/CD Quality Gate
+
+The analyzer can be executed as part of a pipeline:
+
+```bash
+./main.sh
+```
+
+Its exit code can determine whether the pipeline should continue.
+
+---
+
+## 2. Scheduled Log Monitoring
+
+The analyzer could be executed periodically:
+
+```text
+cron
+  |
+  v
+main.sh
+  |
+  v
+Analyze application logs
+  |
+  v
+Return health status
+```
+
+---
+
+## 3. Lightweight Server Monitoring
+
+For a small application running on a Linux server, a lightweight shell-based analyzer can be useful when a full observability platform is unnecessary.
+
+---
+
+## 4. Anomaly Detection
+
+The historical baseline can identify unusual behavior even when an absolute threshold has not been crossed.
+
+For example:
+
+```text
+Normal:
+5 errors
+
+Current:
+15 errors
+
+Absolute threshold:
+20
+
+Threshold detection:
+OK
+
+Statistical detection:
+ANOMALY
+```
+
+This demonstrates why statistical analysis can complement traditional threshold monitoring.
+
+---
+
+# Why Python + Bash?
+
+The project intentionally uses both.
+
+## Python
+
+Python is responsible for:
+
+* Simulating application behavior
+* Generating realistic logs
+* Generating controlled anomaly scenarios
+
+## Bash
+
+Bash is responsible for:
+
+* Linux automation
+* Log processing
+* Operational analysis
 * Exit codes
-* Robust error handling
+* CI/CD integration
+* Runtime file management
 
-### Version 5
-
-DevOps integration:
-
-* Docker containerization
-* GitHub Actions CI pipeline
-* Pipeline failure on anomaly detection
-
-### Version 6
-
-Monitoring integration:
-
-* Prometheus-style metrics output
-* Slack webhook alert support
-* Time-window based anomaly detection
+This reflects a practical DevOps approach where different tools are used for different responsibilities.
 
 ---
 
-## Statistical Model
+# Design Principles
 
-Anomalies are detected using Z-score:
+The project follows a few simple principles.
 
-Z = (X - Mean) / StandardDeviation
+### Keep runtime data separate
 
-Default threshold: 2
-(Threshold is configurable via CLI flag.)
+```text
+Source code
+    ≠
+Runtime state
+```
 
-This allows detection of abnormal log behavior based on deviation from baseline error rates.
+### Keep tests deterministic
+
+Tests should not depend on whatever happened on a developer's machine.
+
+### Keep the tool lightweight
+
+The project deliberately avoids unnecessary dependencies.
+
+### Prefer automation over manual verification
+
+```text
+Manual test
+    ↓
+Automated test
+    ↓
+CI validation
+```
+
+### Build only what the project needs
+
+The project is intentionally not turning into a large observability platform.
 
 ---
 
-## Installation
+# Current Technology Stack
 
-Clone repository:
-
-```bash
-git clone https://github.com/yourusername/logsentinel.git
-cd logsentinel
-chmod +x logsentinel.sh
-```
-
----
-
-## Usage
-
-Basic usage:
-
-```bash
-./logsentinel.sh --file /var/log/nginx/access.log
-```
-
-Custom threshold:
-
-```bash
-./logsentinel.sh --file app.log --threshold 3
-```
-
-JSON output:
-
-```bash
-./logsentinel.sh --file app.log --format json
-```
-
-Exit Codes:
-
-* 0 → No anomaly
-* 1 → Anomaly detected
-* 2 → Invalid input
-
----
-
-## CI/CD Example
-
-Fail pipeline on anomaly:
-
-```bash
-./logsentinel.sh --file app.log
-if [ $? -eq 1 ]; then
-  exit 1
-fi
+```text
+Python 3
+Bash
+Linux
+Git
+GitHub
+GitHub Actions
+AWK
+Grep
+Core Unix utilities
 ```
 
 ---
 
-## Docker Usage
+# Running the Project Locally
 
-Build:
+## 1. Clone the repository
 
 ```bash
-docker build -t logsentinel .
+git clone <repository-url>
+cd Log-Analytics-ToolKit
 ```
+
+## 2. Make scripts executable
+
+```bash
+chmod +x main.sh
+chmod +x test.sh
+```
+
+## 3. Generate logs
 
 Run:
 
 ```bash
-docker run -v $(pwd)/logs:/logs logsentinel --file /logs/app.log
+python3 generator.py
+```
+
+Stop with:
+
+```text
+Ctrl+C
+```
+
+## 4. Analyze logs
+
+```bash
+./main.sh
+```
+
+## 5. Run automated tests
+
+```bash
+./test.sh
 ```
 
 ---
 
-## Use Cases
+# Running an Anomaly Scenario
 
-* Small teams without enterprise monitoring tools
-* CI/CD anomaly detection
-* Pre-production log validation
-* Security log spike detection
-* Lightweight DevOps observability simulation
+Generate abnormal traffic:
 
----
+```bash
+python3 generator.py --anomaly
+```
 
-## Why This Project
+Allow enough log entries to accumulate and then stop the generator.
 
-This project demonstrates applied DevOps engineering practices including:
+Run:
 
-* Statistical reasoning in operations
-* CLI tool design
-* Production thinking
-* CI/CD pipeline integration
-* Containerized deployment
-* Automation-first architecture
+```bash
+./main.sh
+```
+
+The analyzer will evaluate the current log behavior against the historical baseline.
 
 ---
 
-````
-                    ┌──────────────────┐
-                    │   generator.py   │
-                    │                  │
-                    │ Simulated App    │
-                    │ Logs             │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                         app.log
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │   analyzer.sh    │
-                    │                  │
-                    │ Parse            │
-                    │ Metrics          │
-                    │ Baseline         │
-                    │ Z-score          │
-                    │ Classification   │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ Result           │
-                    │                  │
-                    │ OK               │
-                    │ WARNING          │
-                    │ ANOMALY          │
-                    │ CRITICAL         │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                       Exit Code
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ GitHub Actions   │
-                    │                  │
-                    │ Pass / Fail      │
-                    └──────────────────┘
+# Configuration
 
-          ````
+The project currently keeps its core thresholds directly within `main.sh`.
+
+Current values:
+
+```text
+ERROR_THRESHOLD=20
+CRITICAL_THRESHOLD=5
+Z_THRESHOLD=2
+ROLLING_WINDOW=10
+MAX_HISTORY_LINES=20
+```
+
+These values control:
+
+* Error threshold
+* Critical threshold
+* Statistical anomaly threshold
+* Historical window size
+* Runtime history retention
+
+The configuration is intentionally kept simple for the current project scope.
+
+---
+
+# Reliability Considerations
+
+The project includes several safeguards:
+
+* Missing log file detection
+* Controlled exit codes
+* Runtime history retention
+* Test isolation
+* Deterministic test data
+* Separate runtime and test data
+* Automated regression testing
+
+The analyzer also maintains only a limited amount of history rather than allowing the history file to grow indefinitely.
+
+---
+
+# Project Workflow
+
+The overall development workflow is:
+
+```text
+1. Develop
+     |
+     v
+2. Run locally
+     |
+     v
+3. Run ./test.sh
+     |
+     v
+4. Push to GitHub
+     |
+     v
+5. GitHub Actions CI
+     |
+     v
+6. Package
+     |
+     v
+7. Release
+```
+
+---
+
+# Project Scope
+
+## Included
+
+* Application log simulation
+* Normal and anomaly log generation
+* CLI log analysis
+* Error/warning/critical detection
+* Historical baseline
+* Z-score anomaly detection
+* Exit-code based status
+* Automated Bash tests
+* Deterministic test data
+* GitHub Actions CI
+* Continuous Delivery through packaging and release
+
+## Intentionally Not Included
+
+The project intentionally does not attempt to become a full observability platform.
+
+The following are outside the current scope:
+
+* Kubernetes
+* Prometheus
+* Grafana
+* Elasticsearch
+* Logstash
+* Kafka
+* Cloud infrastructure
+* Distributed tracing
+* Full production deployment infrastructure
+* Complex monitoring dashboards
+
+Those technologies solve different problems and are not required to demonstrate the objective of this project.
+
+---
+
+# Future Improvements
+
+Possible future enhancements include:
+
+* Structured JSON log support
+* Additional anomaly detection methods
+* Configurable thresholds
+* More sophisticated test coverage
+* Packaging as an installable CLI
+* Automated versioning
+* GitHub Release automation
+* Optional alert integrations
+* Additional CI quality checks
+
+These will only be introduced if they provide meaningful value to the project.
+
+---
+
+# Learning Outcomes
+
+This project demonstrates practical understanding of:
+
+* Linux shell scripting
+* Bash automation
+* Python scripting
+* Log processing
+* Operational monitoring
+* Statistical reasoning
+* Z-score anomaly detection
+* Historical baselines
+* Exit codes
+* Automated testing
+* Test fixtures
+* CI pipelines
+* Continuous Delivery
+* Release automation
+* DevOps/SRE thinking
+
+---
+
+# Interview Explanation
+
+A concise explanation of the project:
+
+> I built a lightweight CLI-based log analytics and anomaly detection tool for DevOps and SRE environments. It simulates realistic application logs, analyzes error and severity patterns, maintains a recent historical baseline, and uses Z-score analysis to identify abnormal behavior. The analyzer exposes meaningful Linux exit codes so it can be integrated into CI/CD or scheduled monitoring workflows. I also created an automated Bash test suite and GitHub Actions CI to validate the tool consistently from a clean environment.
+
+---
+
+# Example Interview Questions
+
+### Why did you build this?
+
+To demonstrate how operational logs can be converted into an actionable health signal using lightweight Linux automation.
+
+### Why use Z-score?
+
+Fixed thresholds only detect absolute limits. Z-score allows the current behavior to be compared against the application's recent historical baseline.
+
+### Why Bash?
+
+The project is designed around Linux log processing and operational automation, where Bash and standard Unix utilities are highly practical.
+
+### Why Python?
+
+Python is used to generate realistic and controlled application log behavior.
+
+### Why maintain historical data?
+
+Without a baseline, statistical anomaly detection cannot determine whether the current behavior is unusual.
+
+### Why use exit codes?
+
+Exit codes allow CI/CD pipelines, cron jobs, monitoring systems, or other automation tools to consume the analyzer's result.
+
+### Why not use Prometheus or Grafana?
+
+The goal of this project is lightweight CLI-based log analysis and statistical anomaly detection. Adding a full observability stack would increase complexity without contributing to the primary objective.
+
+### Why is runtime data excluded from Git?
+
+Runtime data is generated state. It should not be mixed with source code or deterministic test fixtures.
+
+### Why commit sample log data?
+
+The test suite needs deterministic input that exists in a fresh clone and CI environment.
+
+### What is the difference between CI and CD in this project?
+
+CI validates every change using automated tests. CD packages and prepares a validated version for release rather than artificially deploying it to a production environment.
+
+---
+
+# Project Status
+
+```text
+[✓] Log generation
+[✓] Realistic normal traffic
+[✓] Controlled anomaly generation
+[✓] Log analysis
+[✓] Severity detection
+[✓] Historical baseline
+[✓] Z-score calculation
+[✓] Exit codes
+[✓] Runtime data separation
+[✓] Deterministic test data
+[✓] Automated test suite
+[→] GitHub Actions CI
+[ ] Continuous Delivery
+[ ] Automated packaging
+[ ] Release automation
+```
+
+---
+
+# Author
+
+**Ayushi Singh**
+
+DevOps Engineer | AWS | Linux | Docker | Kubernetes | CI/CD | Observability
+
+GitHub:
+
+[https://github.com/TechWithHer](https://github.com/TechWithHer)
+
+---
+
+# License
+
+This project is intended for learning, experimentation, and demonstration of DevOps/SRE concepts.
+
+```
+
+### One thing I deliberately did **not** put in the README
+
+I did **not** claim that Docker, Kubernetes, AWS, Prometheus, Grafana, or production deployment are part of Project 7. They aren't.
+
+The project's story is much stronger if we keep it honest:
+
+**log generation → log analytics → statistical anomaly detection → automated testing → CI → packaging/release.**
+
+That gives you a coherent, interview-friendly DevOps project instead of another oversized "everything stack."
+```
