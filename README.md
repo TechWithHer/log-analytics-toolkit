@@ -182,37 +182,45 @@ This project demonstrates applied DevOps engineering practices including:
 ---
 
 ````
-
-                ┌─────────────────────┐
-                │   generator.py      │
-                │                     │
-                │ Generates fake      │
-                │ application logs    │
-                └──────────┬──────────┘
-                           │
-                           ▼
-                    logs/app.log
-                           │
-                           │ every 5 sec
-                           ▼
-                ┌─────────────────────┐
-                │      main.sh        │
-                │                     │
-                │ Parse logs          │
-                │ Count errors        │
-                │ Count warnings      │
-                │ Count critical      │
-                │ Calculate Z-score   │
-                │ Determine status    │
-                └──────────┬──────────┘
-                           │
-                ┌──────────┼───────────┐
-                ▼          ▼           ▼
-             History     Logs       Exit Code
-             CSV         file       0 / 1 / 2
-                │
-                ▼
-          Statistical
-          baseline
+                    ┌──────────────────┐
+                    │   generator.py   │
+                    │                  │
+                    │ Simulated App    │
+                    │ Logs             │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                         app.log
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │   analyzer.sh    │
+                    │                  │
+                    │ Parse            │
+                    │ Metrics          │
+                    │ Baseline         │
+                    │ Z-score          │
+                    │ Classification   │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ Result           │
+                    │                  │
+                    │ OK               │
+                    │ WARNING          │
+                    │ ANOMALY          │
+                    │ CRITICAL         │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                       Exit Code
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │ GitHub Actions   │
+                    │                  │
+                    │ Pass / Fail      │
+                    └──────────────────┘
 
           ````
