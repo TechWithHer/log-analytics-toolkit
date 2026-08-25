@@ -1,6 +1,7 @@
 # LogSentinel
 ### Lightweight CLI-Based Log Analytics & Statistical Anomaly Detection System for DevOps and SRE environments.
 
+Generate application logs → continuously analyze them → calculate error statistics → detect abnormal behavior → classify system health → return an exit code that CI/CD can understand.
 ---
 
 ## Overview
@@ -180,3 +181,38 @@ This project demonstrates applied DevOps engineering practices including:
 
 ---
 
+````
+
+                ┌─────────────────────┐
+                │   generator.py      │
+                │                     │
+                │ Generates fake      │
+                │ application logs    │
+                └──────────┬──────────┘
+                           │
+                           ▼
+                    logs/app.log
+                           │
+                           │ every 5 sec
+                           ▼
+                ┌─────────────────────┐
+                │      main.sh        │
+                │                     │
+                │ Parse logs          │
+                │ Count errors        │
+                │ Count warnings      │
+                │ Count critical      │
+                │ Calculate Z-score   │
+                │ Determine status    │
+                └──────────┬──────────┘
+                           │
+                ┌──────────┼───────────┐
+                ▼          ▼           ▼
+             History     Logs       Exit Code
+             CSV         file       0 / 1 / 2
+                │
+                ▼
+          Statistical
+          baseline
+
+          ````
