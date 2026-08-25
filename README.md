@@ -1150,3 +1150,13 @@ The project's story is much stronger if we keep it honest:
 
 That gives you a coherent, interview-friendly DevOps project instead of another oversized "everything stack."
 ```
+
+
+## Related Projects
+
+This project is part of the **DevOps Learning Journey** by TechWithHer.
+
+Explore the complete course and project series:
+
+[DevOps Learning Journey — TechWithHer](https://ayushisingh.notion.site/Learn-Complete-DevOps-with-TechWithHer-d60df188b81e8221a5570156f5f8b477?source=copy_link)
+
