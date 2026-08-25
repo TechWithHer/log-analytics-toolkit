@@ -1,0 +1,13 @@
+# Runtime log files
+app.log
+script_log.log
+
+# Runtime analytics history
+run_history.csv
+
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
