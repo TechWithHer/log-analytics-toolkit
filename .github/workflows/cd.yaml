@@ -1,0 +1,29 @@
+name: CD Pipeline
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create package
+        run: |
+          mkdir -p release
+          tar -czf release/pomodoro-${GITHUB_REF_NAME}.tar.gz \
+            --exclude=".git" \
+            --exclude=".github" \
+            .
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: release/pomodoro-${{ github.ref_name }}.tar.gz
