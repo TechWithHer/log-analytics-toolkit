@@ -5,8 +5,6 @@ set -uo pipefail
 TEST_DATA="test_data/sample_app.log"
 
 LOG_FILE="test_data/sample_app.log"
-HISTORY_FILE="test_data/history_log.log"
-SCRIPT_LOG="test_data/script_log.log"
 
 PASSED=0
 FAILED=0
