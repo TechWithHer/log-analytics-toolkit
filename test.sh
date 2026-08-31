@@ -1,18 +1,27 @@
+```bash
 #!/usr/bin/env bash
 
 set -uo pipefail
 
+# ==================================================
+# Test Configuration
+# ==================================================
+
+# Permanent test data
 TEST_DATA="test_data/sample_app.log"
 
-LOG_FILE="test_data/sample_app.log"
+# Temporary runtime files generated/used during tests
+LOG_FILE="runtime_logs/app.log"
+HISTORY_FILE="run_history.csv"
+SCRIPT_LOG="script_log.log"
 
 PASSED=0
 FAILED=0
 
 
-# --------------------------------------------------
-# Test helpers
-# --------------------------------------------------
+# ==================================================
+# Test Helpers
+# ==================================================
 
 pass() {
     echo "PASS: $1"
@@ -36,9 +45,9 @@ run_test() {
 }
 
 
-# --------------------------------------------------
-# Test environment
-# --------------------------------------------------
+# ==================================================
+# Test Environment
+# ==================================================
 
 cleanup() {
     rm -f "$LOG_FILE"
@@ -56,13 +65,14 @@ setup_sample_log() {
 }
 
 
-# Always clean runtime files when the test suite exits
+# Always clean temporary runtime files when the
+# test suite exits
 trap cleanup EXIT
 
 
-# --------------------------------------------------
-# Test 1 — Healthy application
-# --------------------------------------------------
+# ==================================================
+# Test 1 — Healthy Application
+# ==================================================
 
 test_healthy() {
 
@@ -82,9 +92,9 @@ test_healthy() {
 }
 
 
-# --------------------------------------------------
-# Test 2 — Error threshold
-# --------------------------------------------------
+# ==================================================
+# Test 2 — Error Threshold
+# ==================================================
 
 test_error_threshold() {
 
@@ -114,9 +124,9 @@ test_error_threshold() {
 }
 
 
-# --------------------------------------------------
-# Test 3 — Critical threshold
-# --------------------------------------------------
+# ==================================================
+# Test 3 — Critical Threshold
+# ==================================================
 
 test_critical() {
 
@@ -146,9 +156,9 @@ test_critical() {
 }
 
 
-# --------------------------------------------------
-# Test 4 — History creation
-# --------------------------------------------------
+# ==================================================
+# Test 4 — History Creation
+# ==================================================
 
 test_history_creation() {
 
@@ -168,20 +178,31 @@ test_history_creation() {
 }
 
 
-# --------------------------------------------------
-# Test 5 — Runtime logging
-# --------------------------------------------------
+# ==================================================
+# Test 5 — Runtime Logging
+# ==================================================
 
 test_runtime_logging() {
+
+    cleanup
+    setup_sample_log
+
+    local output
+    local exit_code
+
+    set +e
+    output=$(./main.sh 2>&1)
+    exit_code=$?
+    set -e
 
     [[ -f "$SCRIPT_LOG" ]] &&
     [[ -s "$SCRIPT_LOG" ]]
 }
 
 
-# --------------------------------------------------
-# Test suite
-# --------------------------------------------------
+# ==================================================
+# Test Suite
+# ==================================================
 
 echo
 echo "========================================"
@@ -189,16 +210,21 @@ echo " Log Analytics Toolkit Test Suite"
 echo "========================================"
 echo
 
+
 run_test "Healthy application" test_healthy
+
 run_test "Error threshold" test_error_threshold
+
 run_test "Critical threshold" test_critical
+
 run_test "History creation" test_history_creation
+
 run_test "Runtime logging" test_runtime_logging
 
 
-# --------------------------------------------------
-# Summary
-# --------------------------------------------------
+# ==================================================
+# Test Summary
+# ==================================================
 
 echo
 echo "========================================"
@@ -209,8 +235,10 @@ echo "Failed : $FAILED"
 echo "========================================"
 
 
+# Exit with failure if any test failed
 if [[ "$FAILED" -gt 0 ]]; then
     exit 1
 fi
 
 exit 0
+```
